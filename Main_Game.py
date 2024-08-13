@@ -14,16 +14,20 @@ def next_turn(row, column):
             turn_count = 0  # Reset turn counter after applying the rule
 
         winner = check_winner()
-        if not winner:
-            player = players[1] if player == players[0] else players[0]
-            label.config(text=(player + " turn"))
+        if winner == "Tie":
+            label.config(text="Tie!")
         elif winner:
             label.config(text=(player + " wins"))
-        elif winner == "Tie":
-            label.config(text="Tie!")
+        else:
+            player = players[1] if player == players[0] else players[0]
+            label.config(text=(player + " turn"))
 
 def apply_late_game_rule():
     global move_history, apply_late_game_rule_active
+
+    # Check if there's only one empty space left
+    if empty_spaces() == 1:
+        return  # Stop applying late game rule
 
     if move_history:
         row, column = move_history.pop(random.randint(0, len(move_history) - 1))  # Get a random move in the history
@@ -62,27 +66,27 @@ def check_winner():
         buttons[2][2].config(bg="green")
         return True
 
-    elif buttons[0][2]['text'] == buttons[1][1]['text'] == buttons[2][0]['text'] != "":
+    if buttons[0][2]['text'] == buttons[1][1]['text'] == buttons[2][0]['text'] != "":
         buttons[0][2].config(bg="green")
         buttons[1][1].config(bg="green")
         buttons[2][0].config(bg="green")
         return True
 
-    elif empty_spaces() is False:
+    if not empty_spaces():
         for row in range(3):
             for column in range(3):
                 buttons[row][column].config(bg="yellow")
         return "Tie"
-    else:
-        return False
+
+    return False
 
 def empty_spaces():
-    spaces = 9
+    spaces = 0
     for row in range(3):
         for column in range(3):
-            if buttons[row][column]['text'] != "":
-                spaces -= 1
-    return False if spaces == 0 else True
+            if buttons[row][column]['text'] == "":
+                spaces += 1
+    return spaces
 
 def new_game():
     global player, turn_count, move_history, apply_late_game_rule_active
