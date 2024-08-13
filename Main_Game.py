@@ -2,41 +2,46 @@ from tkinter import *
 import random
 
 def next_turn(row, column):
+    global player, turn_count, apply_late_game_rule_active
 
-    global player
+    if buttons[row][column]['text'] == "" and not check_winner():
+        buttons[row][column]['text'] = player
+        move_history.append((row, column))  # Record the move
+        turn_count += 1
 
-    if buttons[row][column]['text'] == "" and check_winner() is False:
+        if turn_count == 6:
+            apply_late_game_rule()
+            turn_count = 0  # Reset turn counter after applying the rule
 
-        if player == players[0]:
+        winner = check_winner()
+        if not winner:
+            player = players[1] if player == players[0] else players[0]
+            label.config(text=(player + " turn"))
+        elif winner:
+            label.config(text=(player + " wins"))
+        elif winner == "Tie":
+            label.config(text="Tie!")
 
-            buttons[row][column]['text'] = player
+def apply_late_game_rule():
+    global move_history, apply_late_game_rule_active
 
-            if check_winner() is False:
-                player = players[1]
-                label.config(text=(players[1]+" turn"))
+    if move_history:
+        row, column = move_history.pop(random.randint(0, len(move_history) - 1))  # Get a random move in the history
+        current_symbol = buttons[row][column]['text']
 
-            elif check_winner() is True:
-                label.config(text=(players[0]+" wins"))
+        if current_symbol == players[0]:  # Change 'X' to 'O'
+            buttons[row][column]['text'] = players[1]
+        elif current_symbol == players[1]:  # Change 'O' to 'X'
+            buttons[row][column]['text'] = players[0]
 
-            elif check_winner() == "Tie":
-                label.config(text="Tie!")
-
-        else:
-
-            buttons[row][column]['text'] = player
-
-            if check_winner() is False:
-                player = players[0]
-                label.config(text=(players[0]+" turn"))
-
-            elif check_winner() is True:
-                label.config(text=(players[1]+" wins"))
-
-            elif check_winner() == "Tie":
-                label.config(text="Tie!")
+    # Change background to red and show "LATE GAME" label
+    window.config(bg="red")
+    late_game_label.config(text="LATE GAME", bg="red")
+    label.config(bg="red")
+    reset_button.config(bg="red")
+    apply_late_game_rule_active = True
 
 def check_winner():
-
     for row in range(3):
         if buttons[row][0]['text'] == buttons[row][1]['text'] == buttons[row][2]['text'] != "":
             buttons[row][0].config(bg="green")
@@ -64,64 +69,64 @@ def check_winner():
         return True
 
     elif empty_spaces() is False:
-
         for row in range(3):
             for column in range(3):
                 buttons[row][column].config(bg="yellow")
         return "Tie"
-
     else:
         return False
 
-
 def empty_spaces():
-
     spaces = 9
-
     for row in range(3):
         for column in range(3):
             if buttons[row][column]['text'] != "":
                 spaces -= 1
-
-    if spaces == 0:
-        return False
-    else:
-        return True
+    return False if spaces == 0 else True
 
 def new_game():
-
-    global player
+    global player, turn_count, move_history, apply_late_game_rule_active
 
     player = random.choice(players)
+    turn_count = 0
+    move_history = []
+    apply_late_game_rule_active = False
 
-    label.config(text=player+" turn")
+    label.config(text=player + " turn", bg="#F0F0F0")
+    window.config(bg="#F0F0F0")
+    late_game_label.config(text="", bg="#F0F0F0")
+    reset_button.config(bg="#F0F0F0")
 
     for row in range(3):
         for column in range(3):
-            buttons[row][column].config(text="",bg="#F0F0F0")
-
+            buttons[row][column].config(text="", bg="#F0F0F0")
 
 window = Tk()
 window.title("Tic-Tac-Toe")
-players = ["x","o"]
+players = ["x", "o"]
 player = random.choice(players)
-buttons = [[0,0,0],
-           [0,0,0],
-           [0,0,0]]
+turn_count = 0
+move_history = []  # To store the history of moves
+apply_late_game_rule_active = False
 
-label = Label(text=player + " turn", font=('consolas',40))
+label = Label(text=player + " turn", font=('consolas', 40), bg="#F0F0F0")
 label.pack(side="top")
 
-reset_button = Button(text="restart", font=('consolas',20), command=new_game)
+late_game_label = Label(text="", font=('consolas', 60), fg="black", bg="#F0F0F0")
+late_game_label.pack(side="top", pady=10)
+
+reset_button = Button(text="restart", font=('consolas', 20), command=new_game, bg="#F0F0F0")
 reset_button.pack(side="top")
 
 frame = Frame(window)
 frame.pack()
 
+buttons = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+
 for row in range(3):
     for column in range(3):
-        buttons[row][column] = Button(frame, text="",font=('consolas',40), width=5, height=2,
-                                      command= lambda row=row, column=column: next_turn(row,column))
-        buttons[row][column].grid(row=row,column=column)
+        buttons[row][column] = Button(frame, text="", font=('consolas', 40), width=5, height=2,
+                                      command=lambda row=row, column=column: next_turn(row, column))
+        buttons[row][column].grid(row=row, column=column)
 
 window.mainloop()
