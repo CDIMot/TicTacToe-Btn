@@ -1,9 +1,10 @@
 from playsound import playsound
 from tkinter import *
-import tkinter as tk
+from PIL import Image, ImageTk
 import time 
 import random
 
+#audio for win and tie
 def win(): 
     playsound('D:/Music/WIN sound effect.mp3')
 
@@ -32,6 +33,7 @@ def next_turn(row, column):
             player = players[1] if player == players[0] else players[0]
             label.config(text=f"{player} turn")
 
+#changes the whole playing field to red and modifies a move
 def apply_late_game_rule():
     if empty_spaces() > 1 and move_history:
         row, column = move_history.pop(random.randint(0, len(move_history) - 1))
@@ -47,11 +49,11 @@ def check_winner():
                 [(buttons[0][c], buttons[1][c], buttons[2][c]) for c in range(3)] + \
                 [(buttons[0][0], buttons[1][1], buttons[2][2]), (buttons[0][2], buttons[1][1], buttons[2][0])]:
         if trio[0]['text'] == trio[1]['text'] == trio[2]['text'] != "":
-            [btn.config(bg="green") for btn in trio]
+            [btn.config(bg="#a8e1ae") for btn in trio]
             win()
             return trio[0]['text']
 
-    # Check if there's a tie (no empty spaces and no winner)
+    # Check if there's a tie 
     if empty_spaces() == 0:
         [buttons[r][c].config(bg="yellow") for r in range(3) for c in range(3)]
         tie()
@@ -68,7 +70,6 @@ def new_game():
         return
     turn_count, move_history = 0, []
     player = ""
-    #symbol_window_open = False  # Reset the symbol window state
     label.config(text="", bg="#84a59d")
     late_game_label.config(text="", bg="#84a59d")
     window.config(bg="#84a59d")
@@ -76,9 +77,7 @@ def new_game():
 
     for r in range(3):
         for c in range(3):
-            buttons[r][c].config(text="", bg="#F0F0F0", state=DISABLED)  # Disable buttons initially
-
-    #if not symbol_window_open:  # Ensure only one symbol window opens
+            buttons[r][c].config(text="", bg="#F0F0F0", state=DISABLED)  # Disable buttons until a player chooses a symbol
         choose_symbol_window()
 
 def choose_symbol_window():
@@ -90,15 +89,18 @@ def choose_symbol_window():
     symbol_window_open = True
 
     symbol_window = Toplevel(window)
+    Settings = Image.open("C:/Users/charl/Desktop/settings.png")
+    settings = ImageTk.PhotoImage(Settings)
+    symbol_window.iconphoto(False,settings)
     symbol_window.title("Choose Symbol")
-    symbol_window.geometry("300x200")
+    symbol_window.geometry("250x150")
     symbol_window.config(bg="#84a59d")
     
-    Label(symbol_window, text="Choose your symbol", font=('modern', 20, 'bold'), bg="#84a59d").pack(pady=20)
+    Label(symbol_window, text="Choose your symbol", font=('modern', 20, 'bold'), bg="#84a59d").pack(pady=10)
     Button(symbol_window, text="X", font=('modern ', 20, 'bold'), width=5, bg="#f7ede2",
-           command=lambda: start_game("X", symbol_window)).pack(side=LEFT, padx=20)
+           command=lambda: start_game("X", symbol_window)).pack(side=LEFT, padx=10)
     Button(symbol_window, text="O", font=('modern ', 20, 'bold'), width=5, bg="#f7ede2",
-           command=lambda: start_game("O", symbol_window)).pack(side=RIGHT, padx=20)
+           command=lambda: start_game("O", symbol_window)).pack(side=RIGHT, padx=10)
 
 def start_game(symbol, window):
     global player, symbol_window_open
@@ -119,6 +121,9 @@ def disable_buttons():
             buttons[r][c].config(state=DISABLED)
 
 window = Tk()
+Logo = Image.open("C:/Users/charl/Desktop/logo.png")
+logo = ImageTk.PhotoImage(Logo)
+window.iconphoto(False,logo)
 window.title("Tic-Tac-Toe")
 window.geometry("550x680")
 window.config(bg="#84a59d")
