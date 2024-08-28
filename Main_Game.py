@@ -11,6 +11,7 @@ def win():
 def tie(): 
     playsound('D:/Music/Tie sound.mp3')   
     time.sleep(1) 
+    
 def next_turn(row, column):
     global player, turn_count
 
